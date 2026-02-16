@@ -21,13 +21,13 @@ export default function DataTable<T>({ columns, data, keyField }: DataTableProps
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm min-w-[640px]">
         <thead>
           <tr className="border-b border-card-border">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="text-left py-3 px-4 font-medium text-muted"
+                className="text-left py-3 px-4 font-medium text-muted whitespace-nowrap"
               >
                 {col.label}
               </th>

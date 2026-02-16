@@ -6,6 +6,8 @@ import { square } from "@/lib/square";
 import { SPONSOR_TIERS } from "@/lib/sponsor-tiers";
 import { validateAccessCode } from "@/lib/access-code";
 import crypto from "crypto";
+import { sendEmail } from "@/lib/email";
+import { sponsorConfirmationEmail } from "@/lib/email-templates";
 
 const sponsorSchema = z.object({
   tier: z.enum(["platinum", "gold", "silver", "bronze", "hole"]),
@@ -75,6 +77,15 @@ export async function submitSponsorRegistration(input: {
       paymentStatus: "completed",
     },
   });
+
+  // Fire-and-forget confirmation email
+  const emailTemplate = sponsorConfirmationEmail({
+    companyName,
+    contactName,
+    tier,
+    amount,
+  });
+  sendEmail({ to: contactEmail, ...emailTemplate });
 
   return { registrationId: registration.id };
 }

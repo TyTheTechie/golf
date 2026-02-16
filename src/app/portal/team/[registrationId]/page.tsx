@@ -173,7 +173,7 @@ export default function TeamManagementPage() {
             {players.map((p) => (
               <div
                 key={p.slot}
-                className={`flex items-center justify-between px-4 py-3 rounded-lg ${
+                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-3 rounded-lg ${
                   p.name ? "bg-muted-bg" : "bg-muted-bg/50 border border-dashed border-card-border"
                 }`}
               >
@@ -203,7 +203,7 @@ export default function TeamManagementPage() {
                           : setTransferTarget(email)
                       }
                       disabled={isPending}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-card-border text-muted hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+                      className="text-xs px-3 py-1.5 min-h-[44px] min-w-[44px] rounded-lg border border-card-border text-muted hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
                     >
                       {transferTarget === email ? "Confirm Transfer" : "Make Captain"}
                     </button>
@@ -282,7 +282,7 @@ export default function TeamManagementPage() {
               {pendingRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="flex items-center justify-between px-4 py-3 bg-muted-bg rounded-lg"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-3 bg-muted-bg rounded-lg"
                 >
                   <div>
                     <div className="font-medium text-foreground">{req.playerName}</div>
@@ -292,7 +292,7 @@ export default function TeamManagementPage() {
                     <button
                       onClick={() => handleApprove(req.id)}
                       disabled={isPending}
-                      className="p-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50"
+                      className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50"
                       title="Approve"
                     >
                       <Check size={16} />
@@ -300,7 +300,7 @@ export default function TeamManagementPage() {
                     <button
                       onClick={() => handleReject(req.id)}
                       disabled={isPending}
-                      className="p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                      className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
                       title="Reject"
                     >
                       <X size={16} />

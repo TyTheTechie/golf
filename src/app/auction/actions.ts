@@ -3,6 +3,8 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sseManager } from "@/lib/sse-manager";
+import { sendEmail } from "@/lib/email";
+import { outbidNotificationEmail } from "@/lib/email-templates";
 
 export async function placeBid(
   auctionItemId: string,
@@ -76,6 +78,21 @@ export async function placeBid(
         itemTitle: item?.title,
         newAmount: amount,
       });
+
+      // Fire-and-forget outbid email
+      const previousUser = await prisma.user.findUnique({
+        where: { id: result.previousHighBidder },
+        select: { email: true },
+      });
+      if (previousUser?.email && item) {
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        const emailTemplate = outbidNotificationEmail({
+          itemTitle: item.title,
+          newAmount: amount,
+          itemUrl: `${baseUrl}/auction/${auctionItemId}`,
+        });
+        sendEmail({ to: previousUser.email, ...emailTemplate });
+      }
     }
 
     return { success: true };

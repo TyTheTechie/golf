@@ -1,0 +1,12 @@
+.git
+.next
+node_modules
+dev.db
+dev.db-journal
+*.png
+*.jpg
+*.jpeg
+.env
+.env.local
+.env.production
+public/uploads

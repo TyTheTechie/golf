@@ -25,6 +25,7 @@ export default function SponsorLogoUpload({
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("type", "sponsor");
       formData.append("sponsorId", sponsorId);
 
       const res = await fetch("/api/upload", { method: "POST", body: formData });

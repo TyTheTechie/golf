@@ -2,6 +2,8 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
+import { teamJoinRequestEmail, teamJoinApprovedEmail } from "@/lib/email-templates";
 
 async function requireUser() {
   const session = await auth();
@@ -110,6 +112,23 @@ export async function requestToJoinTeam(registrationId: string) {
     },
   });
 
+  // Fire-and-forget email to captain
+  if (registration.captainUserId) {
+    const captain = await prisma.user.findUnique({
+      where: { id: registration.captainUserId },
+      select: { email: true },
+    });
+    if (captain?.email) {
+      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+      const emailTemplate = teamJoinRequestEmail({
+        requesterName: user.name || user.email,
+        teamName: registration.teamName || "your team",
+        manageUrl: `${baseUrl}/portal/team/${registrationId}`,
+      });
+      sendEmail({ to: captain.email, ...emailTemplate });
+    }
+  }
+
   return { data: { success: true } };
 }
 
@@ -149,6 +168,13 @@ export async function approveJoinRequest(requestId: string) {
       data: { status: "approved" },
     }),
   ]);
+
+  // Fire-and-forget approval email
+  const emailTemplate = teamJoinApprovedEmail({
+    teamName: reg.teamName || "the team",
+    playerName: request.playerName,
+  });
+  sendEmail({ to: request.playerEmail, ...emailTemplate });
 
   return { data: { success: true, slot: slotField } };
 }

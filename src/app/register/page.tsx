@@ -54,9 +54,15 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        <div className="text-center mt-8">
-          <Link href="/" className="text-muted hover:text-accent transition-colors text-sm">
+        <div className="text-center mt-8 space-y-2">
+          <Link href="/" className="text-muted hover:text-accent transition-colors text-sm block">
             &larr; Back to Home
+          </Link>
+          <Link
+            href="/register/request-access"
+            className="text-accent hover:text-accent-dark transition-colors text-sm"
+          >
+            Don&apos;t have an access code? Request one here
           </Link>
         </div>
       </div>

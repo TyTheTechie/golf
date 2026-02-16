@@ -18,7 +18,6 @@ async function requireAdmin() {
 const auctionItemSchema = z.object({
   title: z.string().min(2),
   description: z.string().min(2),
-  imageUrl: z.string().optional(),
   startingBid: z.number().min(100),
   bidIncrement: z.number().min(100),
   endTime: z.string().optional(),
@@ -27,7 +26,6 @@ const auctionItemSchema = z.object({
 export async function createAuctionItem(input: {
   title: string;
   description: string;
-  imageUrl?: string;
   startingBid: number;
   bidIncrement: number;
   endTime?: string;
@@ -43,7 +41,6 @@ export async function createAuctionItem(input: {
     data: {
       title: parsed.data.title,
       description: parsed.data.description,
-      imageUrl: parsed.data.imageUrl || null,
       startingBid: parsed.data.startingBid,
       bidIncrement: parsed.data.bidIncrement,
       endTime: parsed.data.endTime ? new Date(parsed.data.endTime) : null,

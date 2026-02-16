@@ -6,6 +6,8 @@ import { square, PRICES } from "@/lib/square";
 import { auth } from "@/auth";
 import { validateAccessCode, generateInviteCode } from "@/lib/access-code";
 import crypto from "crypto";
+import { sendEmail } from "@/lib/email";
+import { golferConfirmationEmail } from "@/lib/email-templates";
 
 const playerSchema = z.object({
   name: z.string().min(2),
@@ -81,6 +83,9 @@ export async function submitGolferRegistration(input: {
     },
   });
 
+  // Send confirmation email
+  let finalInviteCode: string | undefined;
+
   // For team registrations: assign captain and generate invite code
   if (type === "team") {
     const updateData: { captainUserId?: string; inviteCode?: string } = {};
@@ -106,7 +111,18 @@ export async function submitGolferRegistration(input: {
         data: updateData,
       });
     }
+    finalInviteCode = updateData.inviteCode;
   }
+
+  // Fire-and-forget confirmation email
+  const emailTemplate = golferConfirmationEmail({
+    playerName: players[0].name,
+    type,
+    teamName: teamName || undefined,
+    amount,
+    inviteCode: finalInviteCode,
+  });
+  sendEmail({ to: players[0].email, ...emailTemplate });
 
   return { registrationId: registration.id };
 }

@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+    volumes:
+      - uploads:/app/public/uploads
+      - sqlite_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  sqlite_data:
