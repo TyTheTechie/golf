@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import DataTable from "@/components/admin/DataTable";
 import ExportButton from "@/components/admin/ExportButton";
+import DeleteButton from "@/components/admin/DeleteButton";
 
 export default async function AdminRegistrationsPage() {
   const registrations = await prisma.golferRegistration.findMany({
@@ -32,6 +33,9 @@ export default async function AdminRegistrationsPage() {
     { key: "createdAt", label: "Date", render: (r: typeof registrations[0]) =>
       new Date(r.createdAt).toLocaleDateString()
     },
+    { key: "actions", label: "", render: (r: typeof registrations[0]) => (
+      <DeleteButton id={r.id} type="registration" />
+    )},
   ];
 
   return (

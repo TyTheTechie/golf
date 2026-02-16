@@ -10,6 +10,9 @@ import {
   UserCog,
   Settings,
   ArrowLeft,
+  Camera,
+  Heart,
+  Send,
 } from "lucide-react";
 
 const navItems = [
@@ -17,7 +20,10 @@ const navItems = [
   { label: "Registrations", href: "/admin/registrations", icon: Users },
   { label: "Sponsors", href: "/admin/sponsors", icon: Building2 },
   { label: "Auction", href: "/admin/auction", icon: Gavel },
+  { label: "Donations", href: "/admin/donations", icon: Heart },
+  { label: "Photos", href: "/admin/photos", icon: Camera },
   { label: "Users", href: "/admin/users", icon: UserCog },
+  { label: "Email Blast", href: "/admin/email-blast", icon: Send },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

@@ -161,6 +161,70 @@ export function passwordResetEmail({
   };
 }
 
+export function auctionWinnerEmail({
+  itemTitle,
+  winningBid,
+  itemUrl,
+}: {
+  itemTitle: string;
+  winningBid: number;
+  itemUrl: string;
+}) {
+  const amountStr = `$${(winningBid / 100).toFixed(2)}`;
+  return {
+    subject: `You won "${itemTitle}"!`,
+    html: layout(`
+      <h2 style="margin:0 0 8px;color:${BRAND.green};">Congratulations, You Won!</h2>
+      <p style="color:${BRAND.muted};margin:0 0 20px;">Your bid on <strong>${itemTitle}</strong> was the winning bid.</p>
+      <div style="padding:16px;background:${BRAND.bg};border-radius:8px;text-align:center;margin-bottom:20px;">
+        <p style="margin:0 0 4px;font-size:13px;color:${BRAND.muted};">Winning Bid</p>
+        <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.green};">${amountStr}</p>
+      </div>
+      <a href="${itemUrl}" style="display:block;text-align:center;padding:12px 24px;background:${BRAND.green};color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">View Item</a>
+      <p style="color:${BRAND.muted};font-size:13px;margin:16px 0 0;text-align:center;">We'll be in touch with collection details.</p>
+    `),
+  };
+}
+
+export function donationConfirmationEmail({
+  name,
+  amount,
+}: {
+  name: string;
+  amount: number;
+}) {
+  const amountStr = `$${(amount / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+  return {
+    subject: "Thank You for Your Donation - JMC Charities",
+    html: layout(`
+      <h2 style="margin:0 0 8px;color:${BRAND.green};">Thank You, ${name}!</h2>
+      <p style="color:${BRAND.muted};margin:0 0 20px;">Your generous donation will make a real difference.</p>
+      <div style="padding:16px;background:${BRAND.bg};border-radius:8px;text-align:center;">
+        <p style="margin:0 0 4px;font-size:13px;color:${BRAND.muted};">Donation Amount</p>
+        <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.green};">${amountStr}</p>
+      </div>
+    `),
+  };
+}
+
+export function emailBlastTemplate({
+  subject,
+  message,
+}: {
+  subject: string;
+  message: string;
+}) {
+  const formattedMessage = message.replace(/\n/g, "<br>");
+  return {
+    subject,
+    html: layout(`
+      <div style="font-size:15px;line-height:1.6;color:${BRAND.text};">
+        ${formattedMessage}
+      </div>
+    `),
+  };
+}
+
 export function accessRequestEmail({
   requesterName,
   requesterEmail,

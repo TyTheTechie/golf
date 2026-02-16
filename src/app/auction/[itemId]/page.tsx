@@ -3,12 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Gavel } from "lucide-react";
 import AuctionCountdown from "@/components/auction/AuctionCountdown";
 import BidHistory from "@/components/auction/BidHistory";
 import BidModal from "@/components/auction/BidModal";
 import OutbidToast from "@/components/auction/OutbidToast";
+import FavoriteButton from "@/components/auction/FavoriteButton";
 import { getAuctionItem, placeBid } from "../actions";
+import { getMyFavoriteIds } from "../favorites-actions";
 
 interface Bid {
   id: string;
@@ -36,6 +39,7 @@ export default function AuctionItemPage() {
   const [item, setItem] = useState<AuctionItemDetail | null>(null);
   const [showBidModal, setShowBidModal] = useState(false);
   const [error, setError] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   const loadItem = useCallback(async () => {
     const data = await getAuctionItem(itemId);
@@ -46,6 +50,9 @@ export default function AuctionItemPage() {
     let cancelled = false;
     getAuctionItem(itemId).then((data) => {
       if (!cancelled && data) setItem(data as unknown as AuctionItemDetail);
+    });
+    getMyFavoriteIds().then((ids) => {
+      if (!cancelled) setFavoriteIds(ids);
     });
     return () => { cancelled = true; };
   }, [itemId]);
@@ -111,11 +118,16 @@ export default function AuctionItemPage() {
           {/* Image */}
           <div>
             {item.imageUrl ? (
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full rounded-xl object-cover aspect-square"
-              />
+              <div className="relative w-full rounded-xl overflow-hidden aspect-square">
+                <Image
+                  src={item.imageUrl}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                />
+              </div>
             ) : (
               <div className="w-full rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 aspect-square flex items-center justify-center">
                 <Gavel size={64} className="text-accent/30" />
@@ -126,9 +138,15 @@ export default function AuctionItemPage() {
           {/* Details */}
           <div>
             <AuctionCountdown endTime={item.endTime?.toISOString?.() ?? (item.endTime as unknown as string)} />
-            <h1 className="text-2xl font-bold text-foreground mt-2 mb-3">
-              {item.title}
-            </h1>
+            <div className="flex items-center gap-2 mt-2 mb-3">
+              <h1 className="text-2xl font-bold text-foreground">
+                {item.title}
+              </h1>
+              <FavoriteButton
+                auctionItemId={item.id}
+                initialFavorited={favoriteIds.includes(item.id)}
+              />
+            </div>
             <p className="text-muted mb-6">{item.description}</p>
 
             <div className="bg-muted-bg rounded-xl p-5 mb-6">

@@ -5,11 +5,14 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log("Cleaning existing data...");
+  await prisma.auctionFavorite.deleteMany();
   await prisma.bid.deleteMany();
   await prisma.teamJoinRequest.deleteMany();
   await prisma.auctionItem.deleteMany();
   await prisma.golferRegistration.deleteMany();
   await prisma.sponsorRegistration.deleteMany();
+  await prisma.donation.deleteMany();
+  await prisma.photo.deleteMany();
   await prisma.session.deleteMany();
   await prisma.account.deleteMany();
   await prisma.verificationToken.deleteMany();
@@ -224,6 +227,22 @@ async function main() {
 
   // Bids on completed item
   await prisma.bid.create({ data: { amount: 20000, userId: player1.id, auctionItemId: completedItem.id } });
+
+  console.log("Creating donations...");
+  await prisma.donation.create({
+    data: { name: "John Smith", email: "john@example.com", amount: 5000, message: "Great cause!", paymentStatus: "completed" },
+  });
+  await prisma.donation.create({
+    data: { name: "Jane Doe", email: "jane@example.com", amount: 10000, message: "Happy to support the kids!", paymentStatus: "completed" },
+  });
+  await prisma.donation.create({
+    data: { name: "Bob Johnson", email: "bob@example.com", amount: 25000, paymentStatus: "completed" },
+  });
+
+  console.log("Creating favorites...");
+  await prisma.auctionFavorite.create({ data: { userId: player1.id, auctionItemId: item1.id } });
+  await prisma.auctionFavorite.create({ data: { userId: player1.id, auctionItemId: item2.id } });
+  await prisma.auctionFavorite.create({ data: { userId: player2.id, auctionItemId: item3.id } });
 
   console.log("Seed complete!");
   console.log("  Admin: admin@jmccharities.org / admin123");

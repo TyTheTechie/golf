@@ -48,6 +48,28 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    if (type === "photo") {
+      // Photo gallery upload — requires admin
+      const session = await auth();
+      if (!session?.user || session.user.role !== "admin") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const caption = (formData.get("caption") as string) || null;
+      const photoCount = await prisma.photo.count();
+      const filename = `photo-${Date.now()}.${ext}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "photos");
+      await mkdir(uploadDir, { recursive: true });
+      await writeFile(path.join(uploadDir, filename), buffer);
+
+      const url = `/uploads/photos/${filename}`;
+      await prisma.photo.create({
+        data: { url, caption, sortOrder: photoCount },
+      });
+
+      return NextResponse.json({ url });
+    }
+
     if (type === "auction") {
       // Auction image upload — requires admin
       const session = await auth();

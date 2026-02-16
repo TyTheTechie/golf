@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { sseManager } from "@/lib/sse-manager";
 import { z } from "zod/v4";
 import { getEventAccessCode, setEventAccessCode } from "@/lib/access-code";
+import { sendEmail } from "@/lib/email";
+import { auctionWinnerEmail } from "@/lib/email-templates";
 
 async function requireAdmin() {
   const session = await auth();
@@ -120,6 +122,21 @@ export async function updateAuctionItemStatus(
         where: { id: itemId },
         data: { winnerId: highestBid.userId },
       });
+
+      // Fire-and-forget winner email
+      const winner = await prisma.user.findUnique({
+        where: { id: highestBid.userId },
+        select: { email: true },
+      });
+      if (winner?.email) {
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        const emailTemplate = auctionWinnerEmail({
+          itemTitle: item.title,
+          winningBid: highestBid.amount,
+          itemUrl: `${baseUrl}/auction/${itemId}`,
+        });
+        sendEmail({ to: winner.email, ...emailTemplate });
+      }
     }
 
     sseManager.broadcast("auction-ended", {
@@ -169,6 +186,34 @@ export async function updateEventAccessCode(code: string) {
   return { success: true };
 }
 
+// Delete actions
+export async function deleteRegistration(id: string) {
+  await requireAdmin();
+  await prisma.teamJoinRequest.deleteMany({ where: { registrationId: id } });
+  await prisma.golferRegistration.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function deleteSponsor(id: string) {
+  await requireAdmin();
+  await prisma.sponsorRegistration.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function deleteAuctionItem(id: string) {
+  await requireAdmin();
+  await prisma.auctionFavorite.deleteMany({ where: { auctionItemId: id } });
+  await prisma.bid.deleteMany({ where: { auctionItemId: id } });
+  await prisma.auctionItem.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function deleteDonation(id: string) {
+  await requireAdmin();
+  await prisma.donation.delete({ where: { id } });
+  return { success: true };
+}
+
 // Dashboard stats
 export async function getDashboardStats() {
   await requireAdmin();
@@ -179,7 +224,9 @@ export async function getDashboardStats() {
     activeAuctions,
     golferRevenue,
     sponsorRevenue,
+    donationRevenue,
     userCount,
+    donationCount,
   ] = await Promise.all([
     prisma.golferRegistration.count({ where: { paymentStatus: "completed" } }),
     prisma.sponsorRegistration.count({ where: { paymentStatus: "completed" } }),
@@ -192,7 +239,12 @@ export async function getDashboardStats() {
       _sum: { amount: true },
       where: { paymentStatus: "completed" },
     }),
+    prisma.donation.aggregate({
+      _sum: { amount: true },
+      where: { paymentStatus: "completed" },
+    }),
     prisma.user.count(),
+    prisma.donation.count({ where: { paymentStatus: "completed" } }),
   ]);
 
   return {
@@ -200,7 +252,8 @@ export async function getDashboardStats() {
     sponsorCount,
     activeAuctions,
     totalRevenue:
-      (golferRevenue._sum.amount || 0) + (sponsorRevenue._sum.amount || 0),
+      (golferRevenue._sum.amount || 0) + (sponsorRevenue._sum.amount || 0) + (donationRevenue._sum.amount || 0),
     userCount,
+    donationCount,
   };
 }

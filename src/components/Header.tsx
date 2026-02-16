@@ -18,6 +18,8 @@ import {
   ChevronDown,
   LayoutDashboard,
   MapPin,
+  Camera,
+  UserCircle,
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +28,8 @@ const navItems = [
   { label: "Event Details", href: "#details", icon: CalendarDays },
   { label: "Venue", href: "#venue", icon: MapPin },
   { label: "Sponsors", href: "#charities", icon: Heart },
+  { label: "Donate", href: "/donate", icon: Heart },
+  { label: "Gallery", href: "/gallery", icon: Camera },
   { label: "Auction", href: "/auction", icon: Gavel, requiresAuth: true },
   { label: "My Portal", href: "/portal", icon: LayoutDashboard, requiresAuth: true },
 ];
@@ -100,6 +104,22 @@ export default function Header() {
                       >
                         <LayoutDashboard size={16} />
                         My Portal
+                      </Link>
+                      <Link
+                        href="/portal/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground/70 hover:text-accent hover:bg-muted-bg transition-colors"
+                      >
+                        <UserCircle size={16} />
+                        Profile
+                      </Link>
+                      <Link
+                        href="/portal/favorites"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground/70 hover:text-accent hover:bg-muted-bg transition-colors"
+                      >
+                        <Heart size={16} />
+                        My Favorites
                       </Link>
                       <button
                         onClick={() => {

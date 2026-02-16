@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { validateAccessCode } from "@/lib/access-code";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type AuthActionState = {
   error?: string;
@@ -42,6 +43,11 @@ export async function signUpAction(
   }
 
   const { name, username, email, password, accessCode } = parsed.data;
+
+  const { limited } = checkRateLimit(`signup:${email}`, 5, 15 * 60 * 1000);
+  if (limited) {
+    return { error: "Too many attempts. Please try again later." };
+  }
 
   const codeResult = await validateAccessCode(accessCode);
   if (!codeResult.valid) {
@@ -109,6 +115,11 @@ export async function signInAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
+  }
+
+  const { limited } = checkRateLimit(`signin:${parsed.data.email}`, 10, 15 * 60 * 1000);
+  if (limited) {
+    return { error: "Too many login attempts. Please try again later." };
   }
 
   try {

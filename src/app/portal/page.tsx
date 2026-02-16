@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getMyRegistrations } from "./actions";
 import { formatCents } from "@/lib/square";
-import { Users, UserCircle, ArrowRight, Search } from "lucide-react";
+import { Users, UserCircle, ArrowRight, Search, Heart, Settings } from "lucide-react";
 
 export default async function PortalPage() {
   const registrations = await getMyRegistrations();
@@ -9,9 +9,27 @@ export default async function PortalPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-12 pt-24">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">My Portal</h1>
-          <p className="text-muted mt-1">View your registrations and manage your teams</p>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">My Portal</h1>
+            <p className="text-muted mt-1">View your registrations and manage your teams</p>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href="/portal/favorites"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-card-border text-muted hover:text-accent hover:border-accent/30 transition-colors"
+            >
+              <Heart size={16} />
+              Favorites
+            </Link>
+            <Link
+              href="/portal/profile"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-card-border text-muted hover:text-accent hover:border-accent/30 transition-colors"
+            >
+              <Settings size={16} />
+              Profile
+            </Link>
+          </div>
         </div>
 
         {registrations.length === 0 ? (

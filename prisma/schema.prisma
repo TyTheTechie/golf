@@ -19,6 +19,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   bids          Bid[]
+  favorites     AuctionFavorite[]
   captainOf     GolferRegistration[] @relation("teamCaptain")
   joinRequests  TeamJoinRequest[]
   createdAt     DateTime  @default(now())
@@ -147,6 +148,7 @@ model AuctionItem {
   endTime      DateTime?
   winnerId     String?
   bids         Bid[]
+  favorites    AuctionFavorite[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -162,4 +164,35 @@ model Bid {
 
   @@index([auctionItemId])
   @@index([userId])
+}
+
+model AuctionFavorite {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  auctionItemId String
+  auctionItem   AuctionItem @relation(fields: [auctionItemId], references: [id])
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, auctionItemId])
+  @@index([userId])
+}
+
+model Donation {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  amount    Int      // in cents
+  message   String?
+  paymentId String?  // Square payment ID
+  paymentStatus String @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
 }

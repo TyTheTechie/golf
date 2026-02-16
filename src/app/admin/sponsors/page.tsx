@@ -3,6 +3,7 @@ import DataTable from "@/components/admin/DataTable";
 import { SPONSOR_TIERS } from "@/lib/sponsor-tiers";
 import SponsorLogoUpload from "./SponsorLogoUpload";
 import ExportButton from "@/components/admin/ExportButton";
+import DeleteButton from "@/components/admin/DeleteButton";
 
 export default async function AdminSponsorsPage() {
   const sponsors = await prisma.sponsorRegistration.findMany({
@@ -39,6 +40,9 @@ export default async function AdminSponsorsPage() {
     { key: "createdAt", label: "Date", render: (r: typeof sponsors[0]) =>
       new Date(r.createdAt).toLocaleDateString()
     },
+    { key: "actions", label: "", render: (r: typeof sponsors[0]) => (
+      <DeleteButton id={r.id} type="sponsor" />
+    )},
   ];
 
   return (

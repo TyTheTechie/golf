@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Gavel } from "lucide-react";
 import AuctionCountdown from "./AuctionCountdown";
 
@@ -33,11 +34,13 @@ export default function AuctionItemCard({
   return (
     <div className="bg-card-bg border border-card-border rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
       {imageUrl ? (
-        <div className="h-48 bg-muted-bg">
-          <img
+        <div className="h-48 bg-muted-bg relative">
+          <Image
             src={imageUrl}
             alt={title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
       ) : (

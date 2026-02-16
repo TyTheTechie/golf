@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { updateAuctionItemStatus } from "../actions";
+import { updateAuctionItemStatus, deleteAuctionItem } from "../actions";
+import { Trash2 } from "lucide-react";
 
 interface AuctionItem {
   id: string;
@@ -86,6 +87,17 @@ export default function AuctionAdminList({ items }: { items: AuctionItem[] }) {
                 {action.label}
               </button>
             ))}
+            <button
+              onClick={async () => {
+                if (!confirm("Delete this auction item? This cannot be undone.")) return;
+                await deleteAuctionItem(item.id);
+                router.refresh();
+              }}
+              className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Delete"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
         </div>
       ))}
