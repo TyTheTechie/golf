@@ -14,7 +14,7 @@ export async function getProfile() {
   const user = await requireUser();
   return prisma.user.findUnique({
     where: { id: user.id },
-    select: { name: true, username: true, email: true },
+    select: { name: true, username: true, email: true, phone: true, smsOptIn: true },
   });
 }
 
@@ -27,9 +27,16 @@ const profileSchema = z.object({
       /^[a-zA-Z0-9_-]+$/,
       "Username can only contain letters, numbers, hyphens, and underscores"
     ),
+  phone: z.string().optional(),
+  smsOptIn: z.boolean().optional(),
 });
 
-export async function updateProfile(input: { name: string; username: string }) {
+export async function updateProfile(input: {
+  name: string;
+  username: string;
+  phone?: string;
+  smsOptIn?: boolean;
+}) {
   const user = await requireUser();
 
   const parsed = profileSchema.safeParse(input);
@@ -47,7 +54,12 @@ export async function updateProfile(input: { name: string; username: string }) {
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { name: parsed.data.name, username: parsed.data.username },
+    data: {
+      name: parsed.data.name,
+      username: parsed.data.username,
+      phone: parsed.data.phone || null,
+      smsOptIn: parsed.data.smsOptIn ?? false,
+    },
   });
 
   return { success: true };

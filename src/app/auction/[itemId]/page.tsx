@@ -10,6 +10,7 @@ import BidHistory from "@/components/auction/BidHistory";
 import BidModal from "@/components/auction/BidModal";
 import OutbidToast from "@/components/auction/OutbidToast";
 import FavoriteButton from "@/components/auction/FavoriteButton";
+import ShareButtons from "@/components/ShareButtons";
 import { getAuctionItem, placeBid } from "../actions";
 import { getMyFavoriteIds } from "../favorites-actions";
 
@@ -147,7 +148,13 @@ export default function AuctionItemPage() {
                 initialFavorited={favoriteIds.includes(item.id)}
               />
             </div>
-            <p className="text-muted mb-6">{item.description}</p>
+            <p className="text-muted mb-4">{item.description}</p>
+            <div className="mb-6">
+              <ShareButtons
+                url={typeof window !== "undefined" ? window.location.href : `/auction/${itemId}`}
+                title={`Check out "${item.title}" at the JMC Charities Auction!`}
+              />
+            </div>
 
             <div className="bg-muted-bg rounded-xl p-5 mb-6">
               <div className="flex items-end justify-between">

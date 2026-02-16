@@ -5,6 +5,13 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log("Cleaning existing data...");
+  await prisma.score.deleteMany();
+  await prisma.eventResult.deleteMany();
+  await prisma.rafflePrize.deleteMany();
+  await prisma.raffleTicket.deleteMany();
+  await prisma.volunteer.deleteMany();
+  await prisma.waitlistEntry.deleteMany();
+  await prisma.promoCode.deleteMany();
   await prisma.auctionFavorite.deleteMany();
   await prisma.bid.deleteMany();
   await prisma.teamJoinRequest.deleteMany();
@@ -13,6 +20,7 @@ async function main() {
   await prisma.sponsorRegistration.deleteMany();
   await prisma.donation.deleteMany();
   await prisma.photo.deleteMany();
+  await prisma.event.deleteMany();
   await prisma.session.deleteMany();
   await prisma.account.deleteMany();
   await prisma.verificationToken.deleteMany();
@@ -30,6 +38,8 @@ async function main() {
       username: "admin",
       password: adminPassword,
       role: "admin",
+      phone: "314-555-0100",
+      smsOptIn: true,
     },
   });
 
@@ -40,6 +50,8 @@ async function main() {
       username: "mikej",
       password: userPassword,
       role: "user",
+      phone: "314-555-0101",
+      smsOptIn: true,
     },
   });
 
@@ -50,12 +62,58 @@ async function main() {
       username: "sarahw",
       password: userPassword,
       role: "user",
+      phone: "314-555-0102",
+      smsOptIn: false,
     },
   });
 
   console.log("Creating site settings...");
   await prisma.siteSetting.create({
     data: { key: "EVENT_ACCESS_CODE", value: "GOLF2025" },
+  });
+  await prisma.siteSetting.create({
+    data: { key: "MAX_REGISTRATIONS", value: "100" },
+  });
+
+  console.log("Creating events...");
+  const activeEvent = await prisma.event.create({
+    data: {
+      name: "2025 JMC Charity Golf Classic",
+      year: 2025,
+      date: new Date("2025-09-15"),
+      venue: "Forest Park Golf Course",
+      description: "Annual charity golf tournament benefiting local youth programs.",
+      isActive: true,
+    },
+  });
+
+  const pastEvent = await prisma.event.create({
+    data: {
+      name: "2024 JMC Charity Golf Classic",
+      year: 2024,
+      date: new Date("2024-09-16"),
+      venue: "Forest Park Golf Course",
+      description: "Our inaugural charity golf tournament was a huge success!",
+      isActive: false,
+    },
+  });
+
+  console.log("Creating event results for past event...");
+  await prisma.eventResult.createMany({
+    data: [
+      { eventId: pastEvent.id, place: 1, teamName: "The Par-fectors", playerNames: "Tom Brady, Aaron Rodgers, Patrick Mahomes, Josh Allen", score: 58 },
+      { eventId: pastEvent.id, place: 2, teamName: "Hole-in-Fun", playerNames: "Tiger Woods, Phil Mickelson, Rory McIlroy, Jon Rahm", score: 61 },
+      { eventId: pastEvent.id, place: 3, teamName: "Birdie Bunch", playerNames: "Jack Nicklaus, Arnold Palmer, Gary Player, Lee Trevino", score: 63 },
+    ],
+  });
+
+  console.log("Creating promo codes...");
+  await prisma.promoCode.createMany({
+    data: [
+      { code: "EARLY25", type: "percentage", value: 25, maxUses: 0, active: true },
+      { code: "SAVE10", type: "fixed", value: 1000, maxUses: 0, active: true },
+      { code: "LIMITED", type: "percentage", value: 50, maxUses: 5, currentUses: 2, active: true },
+    ],
   });
 
   console.log("Creating sponsors...");
@@ -73,13 +131,14 @@ async function main() {
         ...s,
         paymentStatus: "completed",
         paymentId: `seed_sponsor_${s.tier}`,
+        eventId: activeEvent.id,
       },
     });
   }
 
   console.log("Creating golfer registrations...");
-  // Individual registration 1
-  await prisma.golferRegistration.create({
+  // Individual registration 1 - checked in
+  const reg1 = await prisma.golferRegistration.create({
     data: {
       type: "individual",
       player1Name: "Mike Johnson",
@@ -88,11 +147,14 @@ async function main() {
       amount: 12500,
       paymentId: "seed_golfer_1",
       paymentStatus: "completed",
+      checkedIn: true,
+      checkedInAt: new Date(),
+      eventId: activeEvent.id,
     },
   });
 
-  // Individual registration 2
-  await prisma.golferRegistration.create({
+  // Individual registration 2 - checked in
+  const reg2 = await prisma.golferRegistration.create({
     data: {
       type: "individual",
       player1Name: "Sarah Williams",
@@ -101,11 +163,14 @@ async function main() {
       amount: 12500,
       paymentId: "seed_golfer_2",
       paymentStatus: "completed",
+      checkedIn: true,
+      checkedInAt: new Date(),
+      eventId: activeEvent.id,
     },
   });
 
   // Team registration 1 (Mike is captain)
-  await prisma.golferRegistration.create({
+  const reg3 = await prisma.golferRegistration.create({
     data: {
       type: "team",
       teamName: "Eagle Strikers",
@@ -121,11 +186,12 @@ async function main() {
       amount: 50000,
       paymentId: "seed_golfer_3",
       paymentStatus: "completed",
+      eventId: activeEvent.id,
     },
   });
 
   // Team registration 2 (Sarah is captain, full team)
-  await prisma.golferRegistration.create({
+  const reg4 = await prisma.golferRegistration.create({
     data: {
       type: "team",
       teamName: "Birdie Brigade",
@@ -144,13 +210,31 @@ async function main() {
       amount: 50000,
       paymentId: "seed_golfer_4",
       paymentStatus: "completed",
+      eventId: activeEvent.id,
     },
   });
 
+  console.log("Creating scores...");
+  // Full 18-hole scores for reg1 (Mike individual)
+  const reg1Scores = [4, 3, 5, 4, 3, 4, 5, 3, 4, 4, 5, 3, 4, 4, 5, 3, 4, 4];
+  for (let i = 0; i < 18; i++) {
+    await prisma.score.create({
+      data: { registrationId: reg1.id, hole: i + 1, strokes: reg1Scores[i] },
+    });
+  }
+
+  // Front 9 scores only for reg3 (Eagle Strikers team)
+  const reg3Scores = [3, 4, 4, 3, 5, 4, 3, 4, 5];
+  for (let i = 0; i < 9; i++) {
+    await prisma.score.create({
+      data: { registrationId: reg3.id, hole: i + 1, strokes: reg3Scores[i] },
+    });
+  }
+
   console.log("Creating auction items...");
   const now = new Date();
-  const futureEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-  const pastEnd = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000); // 1 day ago
+  const futureEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const pastEnd = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
 
   const item1 = await prisma.auctionItem.create({
     data: {
@@ -161,6 +245,7 @@ async function main() {
       bidIncrement: 500,
       status: "active",
       endTime: futureEnd,
+      eventId: activeEvent.id,
     },
   });
 
@@ -173,6 +258,7 @@ async function main() {
       bidIncrement: 1000,
       status: "active",
       endTime: futureEnd,
+      eventId: activeEvent.id,
     },
   });
 
@@ -185,6 +271,7 @@ async function main() {
       bidIncrement: 2500,
       status: "active",
       endTime: futureEnd,
+      eventId: activeEvent.id,
     },
   });
 
@@ -195,6 +282,7 @@ async function main() {
       startingBid: 15000,
       bidIncrement: 1000,
       status: "draft",
+      eventId: activeEvent.id,
     },
   });
 
@@ -208,24 +296,21 @@ async function main() {
       status: "completed",
       endTime: pastEnd,
       winnerId: player1.id,
+      eventId: activeEvent.id,
     },
   });
 
   console.log("Creating bids...");
-  // Bids on item1 (Signed Jersey)
   await prisma.bid.create({ data: { amount: 5000, userId: player1.id, auctionItemId: item1.id } });
   await prisma.bid.create({ data: { amount: 10000, userId: player2.id, auctionItemId: item1.id } });
   await prisma.bid.create({ data: { amount: 15000, userId: player1.id, auctionItemId: item1.id } });
 
-  // Bids on item2 (Lake Getaway)
   await prisma.bid.create({ data: { amount: 10000, userId: player2.id, auctionItemId: item2.id } });
   await prisma.bid.create({ data: { amount: 25000, userId: player1.id, auctionItemId: item2.id } });
 
-  // Bids on item3 (TaylorMade Driver)
   await prisma.bid.create({ data: { amount: 20000, userId: player1.id, auctionItemId: item3.id } });
   await prisma.bid.create({ data: { amount: 35000, userId: player2.id, auctionItemId: item3.id } });
 
-  // Bids on completed item
   await prisma.bid.create({ data: { amount: 20000, userId: player1.id, auctionItemId: completedItem.id } });
 
   console.log("Creating donations...");
@@ -243,6 +328,49 @@ async function main() {
   await prisma.auctionFavorite.create({ data: { userId: player1.id, auctionItemId: item1.id } });
   await prisma.auctionFavorite.create({ data: { userId: player1.id, auctionItemId: item2.id } });
   await prisma.auctionFavorite.create({ data: { userId: player2.id, auctionItemId: item3.id } });
+
+  console.log("Creating raffle prizes and tickets...");
+  const prize1 = await prisma.rafflePrize.create({
+    data: { name: "65\" Samsung Smart TV", description: "Brand new 4K QLED Smart TV with wall mount kit." },
+  });
+  const prize2 = await prisma.rafflePrize.create({
+    data: { name: "Yeti Cooler Package", description: "Tundra 45 cooler loaded with $200 worth of drinks and snacks." },
+  });
+  const prize3 = await prisma.rafflePrize.create({
+    data: { name: "$500 Golf Galaxy Gift Card", description: "Shop for new clubs, apparel, and accessories." },
+  });
+
+  // Create 50 sold raffle tickets - 25 for each player
+  for (let i = 1; i <= 50; i++) {
+    await prisma.raffleTicket.create({
+      data: {
+        number: i,
+        userId: i <= 25 ? player1.id : player2.id,
+        status: "sold",
+        price: 500,
+      },
+    });
+  }
+
+  console.log("Creating waitlist entries...");
+  await prisma.waitlistEntry.createMany({
+    data: [
+      { name: "Alex Rivera", email: "alex@example.com", phone: "314-555-0201", type: "individual" },
+      { name: "Team Thunderbirds", email: "thunder@example.com", phone: "314-555-0202", type: "team" },
+      { name: "Casey Morgan", email: "casey@example.com", type: "individual" },
+    ],
+  });
+
+  console.log("Creating volunteers...");
+  await prisma.volunteer.createMany({
+    data: [
+      { name: "Emily Chen", email: "emily@example.com", phone: "314-555-0301", roles: JSON.stringify(["setup", "registration desk"]), shirtSize: "M" },
+      { name: "Marcus Thompson", email: "marcus@example.com", phone: "314-555-0302", roles: JSON.stringify(["beverage cart", "cleanup"]), shirtSize: "L" },
+      { name: "Priya Patel", email: "priya@example.com", phone: "314-555-0303", roles: JSON.stringify(["scoring", "registration desk"]), shirtSize: "S" },
+      { name: "Jake Wilson", email: "jake@example.com", roles: JSON.stringify(["setup", "auction helper", "cleanup"]), shirtSize: "XL" },
+      { name: "Sophia Lee", email: "sophia@example.com", phone: "314-555-0305", roles: JSON.stringify(["registration desk"]), shirtSize: "M", notes: "Available morning only" },
+    ],
+  });
 
   console.log("Seed complete!");
   console.log("  Admin: admin@jmccharities.org / admin123");

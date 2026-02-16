@@ -15,6 +15,21 @@
   --gold-dark: #b8922e;
 }
 
+[data-theme="dark"] {
+  --background: #0a1a0a;
+  --foreground: #e0f0e0;
+  --card-bg: #142014;
+  --card-border: #1e3a1e;
+  --accent: #4a9e4a;
+  --accent-light: #5db85d;
+  --accent-dark: #3a8a3a;
+  --muted: #7aaa7a;
+  --muted-bg: #1a2e1a;
+  --hero-overlay: rgba(0, 0, 0, 0.7);
+  --gold: #e0b850;
+  --gold-dark: #c9a33a;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

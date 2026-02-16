@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, CheckCircle } from "lucide-react";
 import { getProfile, updateProfile } from "./actions";
 
 export default function ProfilePage() {
   const { data: session, update: updateSession } = useSession();
-  const router = useRouter();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [smsOptIn, setSmsOptIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +22,8 @@ export default function ProfilePage() {
       if (data) {
         setName(data.name || "");
         setUsername(data.username || "");
+        setPhone(data.phone || "");
+        setSmsOptIn(data.smsOptIn || false);
       }
       setLoading(false);
     });
@@ -33,7 +35,7 @@ export default function ProfilePage() {
     setError("");
     setSuccess(false);
 
-    const result = await updateProfile({ name, username });
+    const result = await updateProfile({ name, username, phone, smsOptIn });
     if (result.error) {
       setError(result.error);
     } else {
@@ -123,6 +125,36 @@ export default function ProfilePage() {
             <p className="text-xs text-muted mt-1">
               Letters, numbers, hyphens, and underscores only
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 (555) 123-4567"
+              className="w-full px-4 py-2.5 border border-card-border rounded-lg bg-white text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none"
+            />
+          </div>
+
+          <div className="flex items-start gap-3 p-3 bg-muted-bg rounded-lg">
+            <input
+              type="checkbox"
+              id="smsOptIn"
+              checked={smsOptIn}
+              onChange={(e) => setSmsOptIn(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-accent"
+            />
+            <label htmlFor="smsOptIn" className="text-sm text-foreground">
+              <span className="font-medium">SMS Notifications</span>
+              <br />
+              <span className="text-muted text-xs">
+                Receive text alerts for outbid notifications, auction wins, and event reminders.
+              </span>
+            </label>
           </div>
 
           <button

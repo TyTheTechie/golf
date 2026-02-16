@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getMyRegistrations } from "./actions";
 import { formatCents } from "@/lib/square";
 import { Users, UserCircle, ArrowRight, Search, Heart, Settings } from "lucide-react";
+import QRCodeDisplay from "@/components/QRCodeDisplay";
 
 export default async function PortalPage() {
   const registrations = await getMyRegistrations();
@@ -120,16 +121,21 @@ export default async function PortalPage() {
                     )}
                   </div>
 
-                  {reg.type === "team" && reg.isCaptain && (
-                    <div className="mt-4 pt-4 border-t border-card-border">
-                      <Link
-                        href={`/portal/team/${reg.id}`}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-dark transition-colors"
-                      >
-                        Manage Team <ArrowRight size={14} />
-                      </Link>
+                  <div className="mt-4 pt-4 border-t border-card-border flex items-start justify-between">
+                    <div>
+                      {reg.type === "team" && reg.isCaptain && (
+                        <Link
+                          href={`/portal/team/${reg.id}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-dark transition-colors"
+                        >
+                          Manage Team <ArrowRight size={14} />
+                        </Link>
+                      )}
                     </div>
-                  )}
+                    {reg.paymentStatus === "completed" && (
+                      <QRCodeDisplay registrationId={reg.id} />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

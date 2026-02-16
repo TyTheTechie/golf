@@ -16,12 +16,15 @@ model User {
   password      String?
   role          String    @default("user") // "user" | "admin"
   image         String?
+  phone         String?
+  smsOptIn      Boolean   @default(false)
   accounts      Account[]
   sessions      Session[]
   bids          Bid[]
   favorites     AuctionFavorite[]
   captainOf     GolferRegistration[] @relation("teamCaptain")
   joinRequests  TeamJoinRequest[]
+  raffleTickets RaffleTicket[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -99,7 +102,15 @@ model GolferRegistration {
   amount              Int      // in cents
   paymentId           String?  // Square payment ID
   paymentStatus       String   @default("pending") // "pending" | "completed" | "failed"
+  checkedIn           Boolean  @default(false)
+  checkedInAt         DateTime?
+  promoCodeId         String?
+  promoCode           PromoCode? @relation(fields: [promoCodeId], references: [id])
+  discountAmount      Int      @default(0)
+  eventId             String?
+  event               Event?   @relation(fields: [eventId], references: [id])
   joinRequests        TeamJoinRequest[]
+  scores              Score[]
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
@@ -132,6 +143,8 @@ model SponsorRegistration {
   amount          Int      // in cents
   paymentId       String?  // Square payment ID
   paymentStatus   String   @default("pending")
+  eventId         String?
+  event           Event?   @relation(fields: [eventId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -147,6 +160,8 @@ model AuctionItem {
   status       String   @default("draft") // "draft" | "active" | "completed" | "cancelled"
   endTime      DateTime?
   winnerId     String?
+  eventId      String?
+  event        Event?   @relation(fields: [eventId], references: [id])
   bids         Bid[]
   favorites    AuctionFavorite[]
   createdAt    DateTime @default(now())
@@ -194,5 +209,102 @@ model Photo {
   url       String
   caption   String?
   sortOrder Int      @default(0)
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model PromoCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        String   // "percentage" | "fixed"
+  value       Int      // 0-100 for %, cents for fixed
+  maxUses     Int      @default(0) // 0 = unlimited
+  currentUses Int      @default(0)
+  expiresAt   DateTime?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  usedBy      GolferRegistration[]
+}
+
+model WaitlistEntry {
+  id         String    @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  type       String    // "individual" | "team"
+  createdAt  DateTime  @default(now())
+  notifiedAt DateTime?
+}
+
+model Score {
+  id             String             @id @default(cuid())
+  registrationId String
+  registration   GolferRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  hole           Int
+  strokes        Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([registrationId, hole])
+}
+
+model RaffleTicket {
+  id        String       @id @default(cuid())
+  number    Int          @unique
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id])
+  status    String       @default("available") // available | sold | winner
+  price     Int          @default(500) // $5
+  createdAt DateTime     @default(now())
+  wonPrize  RafflePrize?
+}
+
+model RafflePrize {
+  id          String        @id @default(cuid())
+  name        String
+  description String
+  imageUrl    String?
+  ticketId    String?       @unique
+  ticket      RaffleTicket? @relation(fields: [ticketId], references: [id])
+  createdAt   DateTime      @default(now())
+}
+
+model Volunteer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  roles     String   // JSON array
+  shirtSize String?
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id            String   @id @default(cuid())
+  name          String
+  year          Int
+  date          DateTime
+  venue         String
+  description   String
+  isActive      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  results       EventResult[]
+  photos        Photo[]
+  registrations GolferRegistration[]
+  sponsors      SponsorRegistration[]
+  auctionItems  AuctionItem[]
+}
+
+model EventResult {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  place       Int
+  teamName    String
+  playerNames String
+  score       Int
+  createdAt   DateTime @default(now())
 }

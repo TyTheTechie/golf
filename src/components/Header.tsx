@@ -20,7 +20,12 @@ import {
   MapPin,
   Camera,
   UserCircle,
+  HandHeart,
+  Calendar,
+  Ticket,
+  Trophy,
 } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
   { label: "Home", href: "#home", icon: Home },
@@ -30,7 +35,11 @@ const navItems = [
   { label: "Sponsors", href: "#charities", icon: Heart },
   { label: "Donate", href: "/donate", icon: Heart },
   { label: "Gallery", href: "/gallery", icon: Camera },
+  { label: "Volunteer", href: "/volunteer", icon: HandHeart },
+  { label: "Archive", href: "/archive", icon: Calendar },
   { label: "Auction", href: "/auction", icon: Gavel, requiresAuth: true },
+  { label: "Raffle", href: "/raffle", icon: Ticket, requiresAuth: true },
+  { label: "Leaderboard", href: "/leaderboard", icon: Trophy, requiresAuth: true },
   { label: "My Portal", href: "/portal", icon: LayoutDashboard, requiresAuth: true },
 ];
 
@@ -42,7 +51,7 @@ export default function Header() {
   const isAdmin = session?.user?.role === "admin";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-card-border shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card-bg/90 backdrop-blur-md border-b border-card-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 font-bold text-accent text-xl">
@@ -69,6 +78,7 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             {session ? (
               <>
                 {isAdmin && (
@@ -96,7 +106,7 @@ export default function Header() {
                     <ChevronDown size={14} />
                   </button>
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-48 bg-white border border-card-border rounded-lg shadow-lg py-1">
+                    <div className="absolute right-0 mt-1 w-48 bg-card-bg border border-card-border rounded-lg shadow-lg py-1">
                       <Link
                         href="/portal"
                         onClick={() => setUserMenuOpen(false)}
@@ -154,18 +164,21 @@ export default function Header() {
             )}
           </div>
 
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg text-foreground hover:bg-muted-bg transition-colors"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-1 md:hidden">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-lg text-foreground hover:bg-muted-bg transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-card-border">
+        <div className="md:hidden bg-card-bg border-t border-card-border">
           <nav className="px-4 py-3 space-y-1">
             {navItems.map((item) => {
               if (item.requiresAuth && !session) return null;

@@ -34,6 +34,13 @@ export default async function AdminDonationsPage() {
     { key: "createdAt", label: "Date", render: (r: typeof donations[0]) =>
       new Date(r.createdAt).toLocaleDateString()
     },
+    { key: "receipt", label: "Receipt", render: (r: typeof donations[0]) =>
+      r.paymentStatus === "completed" ? (
+        <a href={`/api/receipts/donation/${r.id}`} className="text-accent hover:text-accent-dark text-xs font-medium">
+          Download PDF
+        </a>
+      ) : "—"
+    },
   ];
 
   return (

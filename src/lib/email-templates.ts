@@ -225,6 +225,66 @@ export function emailBlastTemplate({
   };
 }
 
+export function volunteerConfirmationEmail({
+  name,
+  roles,
+}: {
+  name: string;
+  roles: string[];
+}) {
+  const roleList = roles.map((r) => r.charAt(0).toUpperCase() + r.slice(1)).join(", ");
+  return {
+    subject: "Volunteer Signup Confirmed - JMC Charities",
+    html: layout(`
+      <h2 style="margin:0 0 8px;color:${BRAND.green};">Thanks for Volunteering!</h2>
+      <p style="color:${BRAND.muted};margin:0 0 20px;">Hey ${name}, your signup has been received.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr><td style="padding:8px 0;color:${BRAND.muted};">Roles</td><td style="padding:8px 0;text-align:right;font-weight:600;">${roleList}</td></tr>
+      </table>
+      <p style="color:${BRAND.muted};font-size:13px;margin:16px 0 0;">We'll be in touch with event-day details closer to the tournament.</p>
+    `),
+  };
+}
+
+export function waitlistNotificationEmail({
+  name,
+  registerUrl,
+}: {
+  name: string;
+  registerUrl: string;
+}) {
+  return {
+    subject: "A Spot Opened Up - JMC Charities Golf Tournament",
+    html: layout(`
+      <h2 style="margin:0 0 8px;color:${BRAND.green};">Good News, ${name}!</h2>
+      <p style="color:${BRAND.muted};margin:0 0 20px;">A registration spot has opened up. Register now before it fills up again!</p>
+      <a href="${registerUrl}" style="display:block;text-align:center;padding:12px 24px;background:${BRAND.green};color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">Register Now</a>
+    `),
+  };
+}
+
+export function raffleWinnerEmail({
+  prizeName,
+  ticketNumber,
+}: {
+  prizeName: string;
+  ticketNumber: number;
+}) {
+  return {
+    subject: `You Won "${prizeName}" - JMC Charities Raffle!`,
+    html: layout(`
+      <h2 style="margin:0 0 8px;color:${BRAND.gold};">You're a Winner!</h2>
+      <p style="color:${BRAND.muted};margin:0 0 20px;">Your raffle ticket was drawn as the winner!</p>
+      <div style="padding:16px;background:${BRAND.bg};border-radius:8px;text-align:center;margin-bottom:20px;">
+        <p style="margin:0 0 4px;font-size:13px;color:${BRAND.muted};">Winning Ticket</p>
+        <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.green};">#${ticketNumber}</p>
+        <p style="margin:8px 0 0;font-size:16px;font-weight:600;color:${BRAND.text};">${prizeName}</p>
+      </div>
+      <p style="color:${BRAND.muted};font-size:13px;text-align:center;">Visit the registration desk to claim your prize.</p>
+    `),
+  };
+}
+
 export function accessRequestEmail({
   requesterName,
   requesterEmail,

@@ -30,6 +30,7 @@ export default function GolferRegistrationPage() {
     { name: "", email: "", phone: "" },
   ]);
   const [accessCode, setAccessCode] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -62,9 +63,14 @@ export default function GolferRegistrationPage() {
       players: players.slice(0, playerCount),
       paymentToken: token,
       accessCode,
+      promoCode: promoCode || undefined,
     });
 
     if (result.error) {
+      if (result.error === "registration-full") {
+        router.push("/register/waitlist");
+        return;
+      }
       setError(result.error);
       setLoading(false);
     } else {
@@ -270,6 +276,17 @@ export default function GolferRegistrationPage() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="bg-card-bg border border-card-border rounded-xl p-5">
+              <label className="block text-sm font-medium text-foreground mb-1">Promo Code</label>
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                placeholder="Enter promo code (optional)"
+                className="w-full px-4 py-2.5 border border-card-border rounded-lg bg-white text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none uppercase tracking-wider font-mono"
+              />
             </div>
 
             <SquarePaymentForm

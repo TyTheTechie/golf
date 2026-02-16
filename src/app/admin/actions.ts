@@ -186,6 +186,18 @@ export async function updateEventAccessCode(code: string) {
   return { success: true };
 }
 
+export async function updateMaxRegistrations(value: string) {
+  await requireAdmin();
+  const num = parseInt(value);
+  if (isNaN(num) || num < 0) return { error: "Must be a non-negative number" };
+  await prisma.siteSetting.upsert({
+    where: { key: "MAX_REGISTRATIONS" },
+    update: { value: num.toString() },
+    create: { key: "MAX_REGISTRATIONS", value: num.toString() },
+  });
+  return { success: true };
+}
+
 // Delete actions
 export async function deleteRegistration(id: string) {
   await requireAdmin();
