@@ -145,6 +145,22 @@ export function teamJoinApprovedEmail({
   };
 }
 
+export function passwordResetEmail({
+  resetUrl,
+}: {
+  resetUrl: string;
+}) {
+  return {
+    subject: "Reset Your Password - JMC Charities",
+    html: layout(`
+      <h2 style="margin:0 0 8px;color:${BRAND.green};">Reset Your Password</h2>
+      <p style="color:${BRAND.muted};margin:0 0 20px;">We received a request to reset your password. Click the button below to choose a new one.</p>
+      <a href="${resetUrl}" style="display:block;text-align:center;padding:12px 24px;background:${BRAND.green};color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;margin-bottom:20px;">Reset Password</a>
+      <p style="color:${BRAND.muted};font-size:12px;margin:0;">This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+    `),
+  };
+}
+
 export function accessRequestEmail({
   requesterName,
   requesterEmail,

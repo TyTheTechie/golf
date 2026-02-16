@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { updateAuctionItemStatus } from "../actions";
 
 interface AuctionItem {
@@ -70,6 +71,12 @@ export default function AuctionAdminList({ items }: { items: AuctionItem[] }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/admin/auction/${item.id}/edit`}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-card-border text-muted hover:text-foreground hover:bg-muted-bg transition-colors"
+            >
+              Edit
+            </Link>
             {(statusActions[item.status] || []).map((action) => (
               <button
                 key={action.next}

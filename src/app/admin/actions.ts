@@ -50,6 +50,48 @@ export async function createAuctionItem(input: {
   return { item };
 }
 
+export async function getAuctionItemForEdit(itemId: string) {
+  await requireAdmin();
+
+  const item = await prisma.auctionItem.findUnique({
+    where: { id: itemId },
+  });
+
+  if (!item) return { error: "Item not found" };
+  return { item };
+}
+
+export async function updateAuctionItem(
+  itemId: string,
+  input: {
+    title: string;
+    description: string;
+    startingBid: number;
+    bidIncrement: number;
+    endTime?: string;
+  }
+) {
+  await requireAdmin();
+
+  const parsed = auctionItemSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const item = await prisma.auctionItem.update({
+    where: { id: itemId },
+    data: {
+      title: parsed.data.title,
+      description: parsed.data.description,
+      startingBid: parsed.data.startingBid,
+      bidIncrement: parsed.data.bidIncrement,
+      endTime: parsed.data.endTime ? new Date(parsed.data.endTime) : null,
+    },
+  });
+
+  return { item };
+}
+
 export async function updateAuctionItemStatus(
   itemId: string,
   status: "draft" | "active" | "completed" | "cancelled"

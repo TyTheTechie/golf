@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import DataTable from "@/components/admin/DataTable";
+import ExportButton from "@/components/admin/ExportButton";
 
 export default async function AdminRegistrationsPage() {
   const registrations = await prisma.golferRegistration.findMany({
@@ -35,7 +36,10 @@ export default async function AdminRegistrationsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-6">Golfer Registrations</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Golfer Registrations</h1>
+        <ExportButton href="/api/admin/export/registrations" label="Export CSV" />
+      </div>
       <div className="bg-card-bg border border-card-border rounded-xl overflow-hidden">
         <DataTable columns={columns} data={registrations} keyField="id" />
       </div>

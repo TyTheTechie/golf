@@ -97,7 +97,13 @@ function SignInForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted">
+      <div className="mt-4 text-center">
+        <Link href="/auth/forgot-password" className="text-sm text-muted hover:text-accent transition-colors">
+          Forgot your password?
+        </Link>
+      </div>
+
+      <p className="mt-3 text-center text-sm text-muted">
         Don&apos;t have an account?{" "}
         <Link href="/auth/signup" className="text-accent font-medium hover:underline">
           Sign up
