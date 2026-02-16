@@ -36,6 +36,18 @@ yarn-error.log*
 # uploaded files
 /public/uploads/
 
+# database
+dev.db
+
+# screenshots
+*.png
+
+# playwright mcp
+.playwright-mcp/
+
+# windows artifacts
+nul
+
 # vercel
 .vercel
 
